@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Order Confirmation</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="header">Coffee Order System <span class="status">Order Status</span></div>
+<div class="confirmation">
+  <p>Order Placed:</p>
+  <p>Order id: 24</p>
+  <p id="order-summary">Dark roast with milk and double mocha!</p>
+  <p>Total: $4.5</p>
+</div>
+<script>
+  window.onload = () => {
+    const order = JSON.parse(sessionStorage.getItem('order'));
+    let summary = order.beverage;
+    if (order.condiments.length > 0) {
+      summary += ' with ' + order.condiments.map((c, i, arr) => {
+        const count = arr.filter(x => x === c).length;
+        return count > 1 && arr.indexOf(c) === i ? `double ${c.toLowerCase()}` : c.toLowerCase();
+      }).filter((v, i, a) => a.indexOf(v) === i).join(' and ');
+    }
+    summary += '!';
+    document.getElementById('order-summary').innerText = summary;
+  };
+</script>
+</body>
+</html>
