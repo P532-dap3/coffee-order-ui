@@ -10,22 +10,36 @@
 <div class="header">Coffee Order System <span class="status">Order Status</span></div>
 <div class="confirmation">
   <p>Order Placed:</p>
-  <p>Order id: 24</p>
-  <p id="order-summary">Dark roast with milk and double mocha!</p>
-  <p>Total: $4.5</p>
+  <p id="order-id"></p>
+  <p id="order-summary"></p>
+  <p id="order-total"></p>
 </div>
 <script>
-  window.onload = () => {
+  window.onload = async () => {
     const order = JSON.parse(sessionStorage.getItem('order'));
-    let summary = order.beverage;
-    if (order.condiments.length > 0) {
-      summary += ' with ' + order.condiments.map((c, i, arr) => {
-        const count = arr.filter(x => x === c).length;
-        return count > 1 && arr.indexOf(c) === i ? `double ${c.toLowerCase()}` : c.toLowerCase();
-      }).filter((v, i, a) => a.indexOf(v) === i).join(' and ');
+    try {
+      const response = await fetch("https://coffee-order-latest-sato.onrender.com/orders", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(order)
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to submit order.");
+      }
+
+      const receipt = await response.json();
+
+      // Update UI with real receipt info
+      document.getElementById('order-id').innerText = "Order id: " + receipt.id;
+      document.getElementById('order-summary').innerText = receipt.description + "!";
+      document.getElementById('order-total').innerText = "Total: $" + receipt.cost.toFixed(2);
+    } catch (error) {
+      document.getElementById('order-summary').innerText = "Failed to place order.";
+      console.error("Error:", error);
     }
-    summary += '!';
-    document.getElementById('order-summary').innerText = summary;
   };
 </script>
 </body>
